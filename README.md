@@ -2,13 +2,17 @@
 
 로컬 네트워크(SMB)와 외부 원격 서버를 오가며 쉽고 안전하게 대용량 파일을 공유할 수 있게 해주는 클라이언트-서버 기반 파일 공유 솔루션입니다.
 
+<!--![Dashboard Preview](https://raw.githubusercontent.com/CHU3221/ShareManager/main/docs/ShareManager-preview1.png)-->
+<!--![Dashboard Preview](https://raw.githubusercontent.com/CHU3221/ShareManager/main/docs/ShareManager-preview2.png)-->
+<!--![Dashboard Preview](https://raw.githubusercontent.com/CHU3221/ShareManager/main/docs/ShareManager-preview3.png)-->
+
 ---
 
 ## 소개
 
 이 프로젝트는 사용자가 외부 클라우드 서비스에 의존하지 않고, 개인망과 웹 서버를 활용하여 파일 공유 링크를 손쉽게 생성하고 관리할 수 있도록 설계되었습니다.
 
-이전 프로젝트와 마찬가지로 외부 클라우드 의존도를 최소화하고 개인 환경에 맞춘 최적화가 목표입니다.
+외부 클라우드 의존도를 최소화하고 개인 환경에 맞춘 최적화가 목표입니다.
 
 주요 목표:
 
@@ -21,12 +25,12 @@
 
 ## 목차
 
-1. [주요 특징](https://www.google.com/search?q=%23%EC%A3%BC%EC%9A%94-%ED%8A%B9%EC%A7%95)
-2. [사용 기술](https://www.google.com/search?q=%23%EC%82%AC%EC%9A%A9-%EA%B8%B0%EC%88%A0)
-3. [실행 방법](https://www.google.com/search?q=%23%EC%8B%A4%ED%96%89-%EB%B0%A9%EB%B2%95)
-4. [사용 방법](https://www.google.com/search?q=%23%EC%82%AC%EC%9A%A9-%EB%B0%A9%EB%B2%95)
-5. [개발자 가이드](https://www.google.com/search?q=%23%EA%B0%9C%EB%B0%9C%EC%9E%90-%EA%B0%80%EC%9D%B4%EB%93%9C)
-6. [Credits & Open Source Licenses](https://www.google.com/search?q=%23credits--open-source-licenses)
+1. [주요 특징](#주요-특징)
+2. [사용 기술](#사용-기술)
+3. [실행 방법](#실행-방법)
+4. [사용 방법](#사용-방법)
+5. [개발자 가이드](#개발자-가이드)
+6. [Credits & Open Source Licenses](#credits--open-source-licenses)
 
 ---
 
@@ -59,16 +63,16 @@
 ### Infra (배포 환경)
 
 * `/Server`
-* Linux 환경
-* Podman / Docker
-* 컨테이너 기반 실행
+ * Linux 환경
+ * Podman / Docker
+ * 컨테이너 기반 실행
 
 
 
 
 * `/Client`
-* Windows 환경
-* Standalone 실행 파일 및 MSIX 배포 지원
+ * Windows 환경
+ * Standalone 실행 파일 및 MSIX 배포 지원
 
 
 
@@ -80,18 +84,24 @@
 
 ### 1. 컨테이너 환경 (`/Server`)
 
-Podman 또는 Docker가 설치된 Linux 서버 환경에서 실행합니다.
+Podman 또는 Docker가 설치된 Linux 서버 환경에서 실행합니다. 적절한 위치로 파일을 복사하여 컨테이너를 시작합니다.
 
 ```bash
-cd Server/app
+cd <Containerfile이-있는-경로>
+podman stop <컨테이너-이름>
+podman rm <컨테이너-이름>
+podman build -t localhost/<컨테이너-이름>:latest .
 
-docker build -t share-server .
+podman run -d \
+  --name <컨테이너-이름> \
+  --restart always \
+  -p <포트넘버>:<포트넘버> \
+  -v <SMB-공유-경로(링크파일생성)>:/sharedrive:z \
+  -v <Containerfile이-있는-경로>/data:/app/data:z \
+  -v /var/log/share-server.log:/var/log/share-server.log:z \
+  localhost/<컨테이너-이름>:latest
 
-docker run -d \
-  --name share-server \
-  -p 7601:7601 \
-  -v ./data:/app/data \
-  share-server
+podman ps -a
 
 ```
 
@@ -115,6 +125,10 @@ Windows 환경에서 직접 빌드하거나 스토어 앱으로 설치하여 사
 
 1. 프로젝트를 패키징하여 `.msixupload` 또는 `.msix` 파일을 생성합니다.
 2. Windows 환경에서 생성된 파일을 더블클릭하여 앱을 즉시 설치 및 실행할 수 있습니다.
+
+**C. Microsoft Store에서 설치**
+1. [다운로드](#about:blank)
+(note: 앱 심사 중에 있습니다.)
 
 ---
 
