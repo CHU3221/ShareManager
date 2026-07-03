@@ -1,0 +1,137 @@
+<Page
+    x:Class="ShareManager.App.Views.ShareSetupView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <Grid Padding="30" HorizontalAlignment="Stretch" Visibility="{Binding SetupVisibility}">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="새 공유 만들기" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" />
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,20" Padding="0,0,20,0">
+                <StackPanel Spacing="20">
+
+                    <Grid AllowDrop="True" DragEnter="Grid_DragEnter" DragLeave="Grid_DragLeave" DragOver="Grid_DragOver" Drop="Grid_Drop">
+
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="공유할 파일/폴더" FontWeight="SemiBold" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button Content="파일 추가" Click="AddFile_Click" />
+                                <Button Content="폴더 추가" Click="AddFolder_Click" />
+                            </StackPanel>
+                            <ListView ItemsSource="{Binding FilesToShare}" BorderBrush="LightGray" BorderThickness="1" MinHeight="150" MaxHeight="250" HorizontalAlignment="Stretch">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
+                                            <Button Grid.Column="1" Content="제거" Command="{Binding DataContext.RemoveFileCommand, ElementName=RootFrame}" CommandParameter="{Binding}" Background="Transparent" Foreground="Red"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+
+                        <Grid x:Name="DragDropOverlay" Background="#EEFFFFFF" Visibility="Collapsed" CornerRadius="4" IsHitTestVisible="False">
+                            <Rectangle Stroke="#0078D4" StrokeThickness="3" StrokeDashArray="4,4" RadiusX="4" RadiusY="4"/>
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="15">
+                                <FontIcon Glyph="&#xE838;" FontSize="48" Foreground="#0078D4"/>
+                                <TextBlock Text="여기에 파일 놓기" FontSize="20" FontWeight="Bold" Foreground="#0078D4" TextAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+
+                    <TextBox Header="공유 이름 (URL에 사용됨)" Text="{Binding ShareName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="영문, 숫자, 하이픈 조합 권장" HorizontalAlignment="Stretch" />
+                    <TextBlock Text="{Binding NameCheckStatus}" FontSize="12" Foreground="Gray" Margin="0,-15,0,0" />
+
+                    <StackPanel Spacing="10">
+                        <ToggleSwitch Header="비밀번호 보호" IsOn="{Binding IsPasswordEnabled, Mode=TwoWay}" />
+                        <PasswordBox Password="{Binding Password, Mode=TwoWay}" Visibility="{Binding PasswordVisibility}" PasswordRevealMode="Visible" PlaceholderText="비밀번호를 입력하세요" MaxWidth="300" HorizontalAlignment="Left" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="10">
+                        <ToggleSwitch Header="최대 다운로드 횟수 설정" IsOn="{Binding IsMaxDownloadsEnabled, Mode=TwoWay}" />
+                        <TextBox Text="{Binding MaxDownloads, Mode=TwoWay}" Visibility="{Binding MaxDownloadsVisibility}" PlaceholderText="예: 10" MaxWidth="150" HorizontalAlignment="Left" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="10">
+                        <ToggleSwitch Header="다운로드 만료 기간 설정" IsOn="{Binding IsExpireDateEnabled, Mode=TwoWay}" />
+
+                        <StackPanel Visibility="{Binding ExpireDateVisibility}" Spacing="5">
+                            <!-- 연, 월, 일 텍스트 입력창 -->
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <TextBox Text="{Binding ExpireYear, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="70" TextAlignment="Center" PlaceholderText="YYYY"/>
+                                <TextBlock Text="년" VerticalAlignment="Center"/>
+
+                                <TextBox Text="{Binding ExpireMonth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" TextAlignment="Center" PlaceholderText="MM"/>
+                                <TextBlock Text="월" VerticalAlignment="Center"/>
+
+                                <TextBox Text="{Binding ExpireDay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" TextAlignment="Center" PlaceholderText="DD"/>
+                                <TextBlock Text="일" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- 오류 발생 시 나타나는 빨간 경고 텍스트 -->
+                            <TextBlock Text="{Binding ExpireWarningMessage}" Foreground="Red" FontSize="12" Visibility="{Binding ExpireWarningVisibility}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Spacing="10">
+                        <ToggleSwitch Header="공유 메모 추가" IsOn="{Binding IsMemoEnabled, Mode=TwoWay}" />
+                        <TextBox Text="{Binding Memo, Mode=TwoWay}" Visibility="{Binding MemoVisibility}" PlaceholderText="메모를 입력하세요 (다운로드 페이지에 표시됨)" AcceptsReturn="True" Height="100" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="15" HorizontalAlignment="Right">
+                <Button Content="취소" Command="{Binding CancelCommand}" Width="100" IsEnabled="{Binding !IsWorking}"/>
+                <Button Content="공유 시작" Command="{Binding StartShareCommand}" IsEnabled="{Binding IsShareButtonEnabled}" Style="{StaticResource AccentButtonStyle}" Width="150"/>
+            </StackPanel>
+        </Grid>
+
+
+        <Grid Padding="40" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding CompletionVisibility}">
+            <StackPanel Spacing="25" HorizontalAlignment="Center">
+
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                    <FontIcon Glyph="&#xE73E;" Foreground="Green" FontSize="28"/>
+                    <TextBlock Text="공유가 준비되었습니다." FontSize="28" FontWeight="SemiBold" Foreground="Green" />
+                </StackPanel>
+
+                <TextBlock Text="아래 링크 또는 QR 코드를 통해 항목에 액세스할 수 있습니다." FontSize="14" Foreground="Gray" HorizontalAlignment="Center" />
+
+                <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="15" HorizontalAlignment="Center" Background="White">
+                    <Image Source="{Binding QrCodeImage}" Width="200" Height="200" />
+                </Border>
+
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                    <TextBox Text="{Binding FinalUrl}" IsReadOnly="True" Width="350" VerticalAlignment="Center"/>
+                    <Button Content="복사" Command="{Binding CopyToClipboardCommand}" Style="{StaticResource AccentButtonStyle}" Width="80"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="15" HorizontalAlignment="Center" Margin="0,20,0,0">
+                    <Button Content="목록으로 이동" Command="{Binding FinishAndReturnCommand}" Width="150" />
+                    <Button Content="닫기" Click="ExitApp_Click" Width="100" />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+
+        <Grid Background="#CCFFFFFF" Visibility="{Binding ProgressVisibility}" CornerRadius="8">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
+                <ProgressRing IsActive="True" Width="60" Height="60"/>
+                <TextBlock Text="{Binding ProgressMessage}" FontSize="18" FontWeight="SemiBold" TextAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+
+    </Grid>
+</Page>

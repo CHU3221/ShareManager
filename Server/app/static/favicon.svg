@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><defs>
+        <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#E1F5FE"></stop>
+            <stop offset="100%" stop-color="#81D4FA"></stop>
+        </linearGradient>
+        
+        <linearGradient id="arrowDownGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#29B6F6"></stop>
+            <stop offset="100%" stop-color="#0277BD"></stop>
+        </linearGradient>
+    </defs><path fill="url(#cloudGrad)" d="M 46 44 A 12 12 0 0 0 42.5 20.8 A 16 16 0 0 0 16 24 A 10 10 0 0 0 16 44 H 46 Z"></path><path fill="url(#arrowDownGrad)" d="M 28 28 H 36 V 46 H 42 L 32 60 L 22 46 H 28 Z"></path></svg>
