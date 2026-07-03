@@ -10,11 +10,11 @@
   IgnorableNamespaces="uap rescap systemai uap18">
 
   <Identity
-    Name="3aed6861-250b-4d19-ba0e-189dba0232d8"
-    Publisher="CN=CHU"
-    Version="1.0.0.0" />
+    Name="CHU3221.ShareManager"
+    Publisher="CN=4D331C71-2597-4F3D-9F05-2DDAC02E8CE7"
+    Version="1.0.1.0" />
 
-  <mp:PhoneIdentity PhoneProductId="3aed6861-250b-4d19-ba0e-189dba0232d8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="211f93ee-69bd-4e03-9a4e-231482fee66e" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>ShareManager</DisplayName>
