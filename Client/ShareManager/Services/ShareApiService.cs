@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -12,58 +13,95 @@ namespace ShareManager.App.Services
         public ShareApiService(string baseUrl, string apiKey)
         {
             _apiKey = apiKey;
-            _httpClient = new HttpClient { BaseAddress = new System.Uri(baseUrl) };
+            _httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
+
+            _httpClient.Timeout = TimeSpan.FromSeconds(7);
+
             _httpClient.DefaultRequestHeaders.Add("X-API-Key", _apiKey);
+        }
+
+        private async Task<T> ExecuteWithTimeoutAsync<T>(Func<Task<T>> action)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (TaskCanceledException)
+            {
+                throw new Exception("서버 응답 시간이 초과되었습니다. (Timeout)");
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception($"통신 실패 (상세 이유: {ex.Message})");
+            }
         }
 
         public async Task<ServerInfoResponse> GetServerInfoAsync()
         {
-            var response = await _httpClient.GetAsync("/api/info");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<ServerInfoResponse>() ?? new ServerInfoResponse();
+            return await ExecuteWithTimeoutAsync(async () =>
+            {
+                var response = await _httpClient.GetAsync("/api/info");
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<ServerInfoResponse>() ?? new ServerInfoResponse();
+            });
         }
 
         public async Task<ShareInitResponse> InitShareAsync(ShareInitRequest request)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/shares/init", request);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<ShareInitResponse>() ?? new ShareInitResponse();
+            return await ExecuteWithTimeoutAsync(async () =>
+            {
+                var response = await _httpClient.PostAsJsonAsync("/api/shares/init", request);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<ShareInitResponse>() ?? new ShareInitResponse();
+            });
         }
 
         public async Task CompleteShareAsync(string uuid)
         {
-            var response = await _httpClient.PutAsync($"/api/shares/{uuid}/complete", null);
-            response.EnsureSuccessStatusCode();
+            await ExecuteWithTimeoutAsync(async () =>
+            {
+                var response = await _httpClient.PutAsync($"/api/shares/{uuid}/complete", null);
+                response.EnsureSuccessStatusCode();
+                return true;
+            });
         }
 
         public async Task<ShareItem[]> GetSharesAsync()
         {
-            try
+            return await ExecuteWithTimeoutAsync(async () =>
             {
-                return await _httpClient.GetFromJsonAsync<ShareItem[]>("/api/shares") ?? System.Array.Empty<ShareItem>();
-            }
-            catch
-            {
-                throw;
-            }
+                return await _httpClient.GetFromJsonAsync<ShareItem[]>("/api/shares") ?? Array.Empty<ShareItem>();
+            });
         }
 
         public async Task UpdateShareAsync(string uuid, UpdateShareRequest request)
         {
-            var response = await _httpClient.PutAsJsonAsync($"/api/shares/{uuid}", request);
-            response.EnsureSuccessStatusCode();
+            await ExecuteWithTimeoutAsync(async () =>
+            {
+                var response = await _httpClient.PutAsJsonAsync($"/api/shares/{uuid}", request);
+                response.EnsureSuccessStatusCode();
+                return true;
+            });
         }
 
         public async Task DeleteShareAsync(string uuid)
         {
-            var response = await _httpClient.DeleteAsync($"/api/shares/{uuid}");
-            response.EnsureSuccessStatusCode();
+            await ExecuteWithTimeoutAsync(async () =>
+            {
+                var response = await _httpClient.DeleteAsync($"/api/shares/{uuid}");
+                response.EnsureSuccessStatusCode();
+                return true;
+            });
         }
 
         public async Task UpdateStatusAsync(string uuid, string status)
         {
-            var response = await _httpClient.PutAsJsonAsync($"/api/shares/{uuid}/status", new { status = status });
-            response.EnsureSuccessStatusCode();
+            await ExecuteWithTimeoutAsync(async () =>
+            {
+                var response = await _httpClient.PutAsJsonAsync($"/api/shares/{uuid}/status", new { status = status });
+                response.EnsureSuccessStatusCode();
+                return true;
+            });
         }
     }
 

@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Configuration;
+using System;
+using System.IO;
 using Windows.Storage;
 
 namespace ShareManager.App.Services
@@ -11,7 +13,20 @@ namespace ShareManager.App.Services
         public SettingsService(IConfiguration configuration)
         {
             _configuration = configuration;
+
+            if (!Directory.Exists(LocalDataPath))
+            {
+                Directory.CreateDirectory(LocalDataPath);
+            }
         }
+
+        public bool IsStandaloneMode
+        {
+            get => _localSettings.Values["IsStandaloneMode"] as bool? ?? true;
+            set => _localSettings.Values["IsStandaloneMode"] = value;
+        }
+
+        public string LocalDataPath => ApplicationData.Current.LocalFolder.Path;
 
         public string ServerIp
         {
@@ -31,20 +46,40 @@ namespace ShareManager.App.Services
 
         public string ApiKey
         {
-            get => _localSettings.Values["ApiKey"] as string
-                ?? _configuration.GetValue<string>("Server:ApiKey")
-                ?? string.Empty;
+            get
+            {
+                var existing = _localSettings.Values["ApiKey"] as string;
+                if (string.IsNullOrEmpty(existing))
+                {
+                    string newKey = Guid.NewGuid().ToString("N");
+                    _localSettings.Values["ApiKey"] = newKey;
+                    return newKey;
+                }
+                return existing;
+            }
             set => _localSettings.Values["ApiKey"] = value;
         }
 
         public string SmbBasePath
         {
-            get => _localSettings.Values["SmbBasePath"] as string
-                ?? _configuration.GetValue<string>("Server:SmbBasePath")
-                ?? @"\\192.168.1.100\SharedLinks";
+            get
+            {
+                if (IsStandaloneMode)
+                    return Path.Combine(LocalDataPath, "sharedrive");
+
+                return _localSettings.Values["SmbBasePath"] as string
+                    ?? _configuration.GetValue<string>("Server:SmbBasePath")
+                    ?? @"\\192.168.1.100\SharedLinks";
+            }
             set => _localSettings.Values["SmbBasePath"] = value;
         }
 
-        public string GetBaseUrl() => $"http://{ServerIp}:{Port}";
+        public string GetBaseUrl()
+        {
+            if (IsStandaloneMode)
+                return $"http://127.0.0.1:{Port}";
+
+            return $"http://{ServerIp}:{Port}";
+        }
     }
 }

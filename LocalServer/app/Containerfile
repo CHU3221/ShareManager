@@ -1,0 +1,18 @@
+FROM golang:1.25 AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=1 GOOS=linux go build -o share-server main.go
+
+FROM debian:bookworm-slim
+WORKDIR /app
+COPY --from=builder /app/share-server .
+COPY templates/ ./templates/
+COPY static/ ./static/
+
+RUN mkdir -p /app/data /var/log
+
+#PortNumber
+EXPOSE 1234
+CMD ["./share-server"]
