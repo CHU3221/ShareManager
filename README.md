@@ -129,7 +129,7 @@ Windows 환경에서 직접 빌드하거나 스토어 앱으로 설치하여 사
 2. Windows 환경에서 생성된 파일을 더블클릭하여 앱을 즉시 설치 및 실행할 수 있습니다.
 
 **C. Microsoft Store에서 설치**
-1. [다운로드](#https://apps.microsoft.com/detail/9N1V9CF9NJPB?hl=ko-kr&gl=KR&ocid=pdpshare)
+1. [다운로드](https://apps.microsoft.com/detail/9N1V9CF9NJPB?hl=ko-kr&gl=KR&ocid=pdpshare)
 
 ---
 
